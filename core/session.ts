@@ -12,17 +12,19 @@ import {
 export type Command =
   | { readonly kind: "move"; readonly direction: Direction }
   | { readonly kind: "restart" }
-  | { readonly kind: "choose-level"; readonly level: number };
+  | { readonly kind: "choose-level"; readonly level: number }
+  | { readonly kind: "undo" };
 
 export interface SessionState {
   /** Index into LEVELS. */
   readonly level: number;
   readonly puzzle: Puzzle;
+  past: readonly Puzzle[];
 }
 
 export function startLevel(level: number): SessionState {
   const { name, rows } = LEVELS[level];
-  return { level, puzzle: parsePuzzle(name, rows) };
+  return { level, puzzle: parsePuzzle(name, rows), past: [] };
 }
 
 /**
@@ -34,12 +36,21 @@ export function update(state: SessionState, command: Command): SessionState {
     case "move": {
       if (isSolved(state.puzzle)) return state;
       const puzzle = move(state.puzzle, command.direction);
+      if (puzzle !== state.puzzle) {
+        state.past = state.past.concat([state.puzzle]);
+      }
       return puzzle === state.puzzle ? state : { ...state, puzzle };
     }
     case "restart":
       return startLevel(state.level);
     case "choose-level":
       return startLevel(command.level);
+    case "undo": {
+      if (state.past.length == 0) return state;
+      const puzzle: Puzzle = state.past.at(-1) as Puzzle;
+      const past = state.past.slice(0, -1);
+      return { level: state.level, puzzle: puzzle, past: past };
+    }
   }
 }
 
