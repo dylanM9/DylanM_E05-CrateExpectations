@@ -5,6 +5,7 @@ import { CONTROLLERS, initialController } from "./controllers.ts";
 import { ControlsPicker } from "./ControlsPicker.tsx";
 import { LevelPicker } from "./LevelPicker.tsx";
 import { StatusBar } from "./StatusBar.tsx";
+import { GoalTracker } from "./GoalTracker.tsx";
 import { TileClicks } from "./tileClicks.ts";
 import { useSessionState } from "./useSessionState.ts";
 
@@ -40,6 +41,9 @@ export function App({ session }: { session: Session }) {
         <StatusBar
           puzzle={state.puzzle}
           par={LEVELS[state.level].par.length}
+        />
+        <GoalTracker
+          puzzle={state.puzzle}
         />
         {solved && (
           <p className="banner" role="status">
